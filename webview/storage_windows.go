@@ -17,11 +17,13 @@ type cookieManager struct {
 
 func newCookieManager(w *webview) *cookieManager {
 	r := &cookieManager{webview: w}
-	syscall.SyscallN(
-		r.webview.driver.webview22.VTBL.CookieManager,
-		uintptr(unsafe.Pointer(r.webview.driver.webview22)),
-		uintptr(unsafe.Pointer(&r._ICoreWebView2CookieManager)),
-	)
+	w.scheduler.MustRun(func() {
+		syscall.SyscallN(
+			r.webview.driver.webview22.VTBL.CookieManager,
+			uintptr(unsafe.Pointer(r.webview.driver.webview22)),
+			uintptr(unsafe.Pointer(&r._ICoreWebView2CookieManager)),
+		)
+	})
 	return r
 }
 

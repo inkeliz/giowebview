@@ -92,8 +92,6 @@ func (r *driver) attach(w *webview) error {
 				syscall.SyscallN(r.webview2.VTBL.AddSourceChanged, uintptr(unsafe.Pointer(r.webview2)), uintptr(unsafe.Pointer(r.callbackLoad)))
 				syscall.SyscallN(r.webview2.VTBL.AddDocumentTitleChanged, uintptr(unsafe.Pointer(r.webview2)), uintptr(unsafe.Pointer(r.callbackTitle)))
 
-				w.javascriptManager = newJavascriptManager(w)
-				w.dataManager = newDataManager(w)
 				atomic.AddUint32(&r.active, 1)
 
 				return 0
@@ -129,6 +127,9 @@ func (r *driver) attach(w *webview) error {
 		}
 		w.scheduler.SetRunner(r.config.RunOnMain)
 	}()
+
+	w.javascriptManager = newJavascriptManager(w)
+	w.dataManager = newDataManager(w)
 
 	return nil
 }

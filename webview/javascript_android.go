@@ -33,12 +33,9 @@ func newJavascriptManager(w *webview) *javascriptManager {
 }
 
 func (j *javascriptManager) installCallback() {
-	err := j.webview.driver.callArgs("webview_set_callback", "(J)V", func(env jni.Env) []jni.Value {
+	j.webview.driver.callArgs("webview_set_callback", "(J)V", func(env jni.Env) []jni.Value {
 		return []jni.Value{jni.Value(j.jsHandler)}
 	})
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (j *javascriptManager) RunJavaScript(js string) error {

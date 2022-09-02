@@ -64,7 +64,6 @@ func (r *driver) attach(w *webview) (err error) {
 	})
 
 	if err != nil {
-		panic(err)
 		return err
 	}
 
@@ -133,10 +132,6 @@ func (r *driver) callArgs(name, sig string, args func(env jni.Env) []jni.Value) 
 	err = jni.Do(r.config.VM, func(env jni.Env) error {
 		return jni.CallVoidMethod(env, r.objWebView, jni.GetMethodID(env, r.clsWebView, name, sig), args(env)...)
 	})
-
-	if err != nil {
-		panic(err)
-	}
 	return err
 }
 
@@ -145,10 +140,5 @@ func (r *driver) callBooleanArgs(name, sig string, args func(env jni.Env) []jni.
 		b, err = jni.CallBooleanMethod(env, r.objWebView, jni.GetMethodID(env, r.clsWebView, name, sig), args(env)...)
 		return err
 	})
-
-	if err != nil {
-		panic(err)
-	}
-
 	return b, err
 }

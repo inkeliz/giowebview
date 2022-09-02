@@ -21,8 +21,10 @@ type javascriptManager struct {
 func newJavascriptManager(w *webview) *javascriptManager {
 	r := &javascriptManager{webview: w}
 	r.jsHandler = internal.NewHandle(r)
-	r.installCallback()
-	r.installJavascript(fmt.Sprintf(scriptCallback, `window.chrome.webview.postMessage`))
+	w.scheduler.MustRun(func() {
+		r.installCallback()
+		r.installJavascript(fmt.Sprintf(scriptCallback, `window.chrome.webview.postMessage`))
+	})
 	return r
 }
 
@@ -36,22 +38,22 @@ func (j *javascriptManager) installCallback() {
 				uintptr(unsafe.Pointer(args)),
 				uintptr(unsafe.Pointer(&message)),
 			)
-
 			if message != nil {
 				receiveCallback(uintptr(j.jsHandler), windows.UTF16PtrToString(message))
 			}
-
 			return 0
 		},
 	}
 
-	var r uint64
-	syscall.SyscallN(
-		j.webview.driver.webview2.VTBL.AddWebMessageReceived,
-		uintptr(unsafe.Pointer(j.webview.driver.webview2)),
-		uintptr(unsafe.Pointer(j.callback)),
-		uintptr(unsafe.Pointer(&r)),
-	)
+	j.webview.scheduler.MustRun(func() {
+		var r uint64
+		syscall.SyscallN(
+			j.webview.driver.webview2.VTBL.AddWebMessageReceived,
+			uintptr(unsafe.Pointer(j.webview.driver.webview2)),
+			uintptr(unsafe.Pointer(j.callback)),
+			uintptr(unsafe.Pointer(&r)),
+		)
+	})
 }
 
 // RunJavaScript implements the JavascriptManager interface.

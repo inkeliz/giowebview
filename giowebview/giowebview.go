@@ -33,11 +33,15 @@ type plugin struct {
 type queue struct {
 	event.Queue
 	events map[event.Tag][]event.Event
+	mutex  sync.Mutex
 }
 
 // Events returns events for the given event.Tag.
 // It will return Gio events and WebView events.
 func (q *queue) Events(t event.Tag) []event.Event {
+	q.mutex.Lock()
+	defer q.mutex.Unlock()
+
 	if w, ok := t.(*WebViewOp); ok {
 		if w != nil {
 			t = w.tag
@@ -53,6 +57,9 @@ func (q *queue) Events(t event.Tag) []event.Event {
 }
 
 func (q *queue) add(t event.Tag, evt event.Event) {
+	q.mutex.Lock()
+	defer q.mutex.Unlock()
+
 	q.events[t] = append(q.events[t], evt)
 }
 
@@ -64,21 +71,16 @@ type gioInternalOps struct {
 	refs    []interface{}
 }
 
-func (ops *gioInternalOps) write(v interface{}) {
-	ops.refs = append(ops.refs, v)
-}
-
 // Plugin hijacks Gio events and wraps them in WebView events.
 // You must call at the beginning of your window.Event function, like this:
 //
-//		for evt := range w.Events() {
-//			giowebview.Plugin(w, evt)
+//	for evt := range w.Events() {
+//		giowebview.Plugin(w, evt)
 //
-// 		    switch evt := evt.(type) {
-// 		    // ...
-// 		    }
-//		}
-//
+//	    switch evt := evt.(type) {
+//	    // ...
+//	    }
+//	}
 func Plugin(w *app.Window, evt event.Event) {
 	p, ok := getPlugin(w)
 	if !ok {
@@ -609,7 +611,8 @@ func (o *InstallJavascriptOp) execute(w *app.Window, p *plugin, _ system.FrameEv
 // as a string.
 //
 // You can use this to communicate with the webview, by using:
-//     window.callback.<name>(<message>);
+//
+//	window.callback.<name>(<message>);
 //
 // Consider that <name> is the provided Name of the callback,
 // and <message> is the message to send to Tag.

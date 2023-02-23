@@ -17,6 +17,6 @@ require (
 	github.com/gioui/uax v0.2.1-0.20220325163150-e3d987515a12 // indirect
 	github.com/go-text/typesetting v0.0.0-20220411150340-35994bc27a7b // indirect
 	golang.org/x/exp v0.0.0-20210722180016-6781d3edade3 // indirect
-	golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d // indirect
-	golang.org/x/text v0.3.8 // indirect
+	golang.org/x/image v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 )
